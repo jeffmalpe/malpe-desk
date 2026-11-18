@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
+import 'package:window_manager/window_manager.dart';
 
 import '../models/platform_model.dart';
 
@@ -266,7 +267,15 @@ class _MalpeLicenseGateState extends State<MalpeLicenseGate> {
     if (_unlocked) return widget.child;
     return Scaffold(
       backgroundColor: _bg,
-      body: _checking
+      body: Column(children: [
+        const _MalpeTitleBar(),
+        Expanded(child: _body()),
+      ]),
+    );
+  }
+
+  Widget _body() {
+    return _checking
           ? const Center(
               child: Column(mainAxisSize: MainAxisSize.min, children: [
               CircularProgressIndicator(color: _violet),
@@ -280,7 +289,84 @@ class _MalpeLicenseGateState extends State<MalpeLicenseGate> {
                 _unlocked = true;
                 _lockMessage = '';
               }),
+            );
+  }
+}
+
+/// Window bar for the login screen: the app's own title bar lives in the
+/// main page, which is not shown until the license is valid.
+class _MalpeTitleBar extends StatelessWidget {
+  const _MalpeTitleBar();
+
+  Widget _btn(IconData icon, VoidCallback onTap, {bool danger = false}) {
+    return _HoverButton(icon: icon, onTap: onTap, danger: danger);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 38,
+      decoration: const BoxDecoration(
+        color: Color(0xFF0A0D18),
+        border: Border(bottom: BorderSide(color: Color(0xFF1C2236))),
+      ),
+      child: Row(children: [
+        Expanded(
+          child: GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onPanStart: (_) => windowManager.startDragging(),
+            child: const Padding(
+              padding: EdgeInsets.only(left: 14),
+              child: Row(children: [
+                Icon(Icons.desktop_windows_outlined,
+                    color: _violetLight, size: 16),
+                SizedBox(width: 8),
+                Text('MALPE Desk',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600)),
+              ]),
             ),
+          ),
+        ),
+        _btn(Icons.remove, () => windowManager.minimize()),
+        _btn(Icons.close, () => windowManager.close(), danger: true),
+      ]),
+    );
+  }
+}
+
+class _HoverButton extends StatefulWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+  final bool danger;
+  const _HoverButton(
+      {required this.icon, required this.onTap, this.danger = false});
+
+  @override
+  State<_HoverButton> createState() => _HoverButtonState();
+}
+
+class _HoverButtonState extends State<_HoverButton> {
+  bool _hover = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hover = true),
+      onExit: (_) => setState(() => _hover = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: Container(
+          width: 46,
+          height: 38,
+          color: _hover
+              ? (widget.danger ? const Color(0xFFE5484D) : const Color(0xFF1C2236))
+              : Colors.transparent,
+          child: Icon(widget.icon, size: 16, color: Colors.white70),
+        ),
+      ),
     );
   }
 }
