@@ -2515,7 +2515,12 @@ pub fn rustdesk_interval(i: Interval) -> ThrottledInterval {
     ThrottledInterval::new(i)
 }
 
+pub const MALPE_APP_NAME: &str = "MALPEDesk";
+
 pub fn load_custom_client() {
+    // MALPE Desk branding: a fixed app name gives the app its own window titles,
+    // install folder, service and config directory, separate from a stock RustDesk.
+    *config::APP_NAME.write().unwrap() = MALPE_APP_NAME.to_owned();
     #[cfg(debug_assertions)]
     if let Ok(data) = std::fs::read_to_string("./custom.txt") {
         read_custom_client(data.trim());
