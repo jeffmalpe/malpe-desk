@@ -1469,6 +1469,10 @@ class RustdeskImpl {
     throw UnimplementedError("cmSendChat");
   }
 
+  Future<void> cmLoginResTrust({required int connId, dynamic hint}) {
+    throw UnimplementedError("cmLoginResTrust");
+  }
+
   Future<void> cmLoginRes(
       {required int connId, required bool res, dynamic hint}) {
     throw UnimplementedError("cmLoginRes");

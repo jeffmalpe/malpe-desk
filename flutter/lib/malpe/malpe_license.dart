@@ -8,7 +8,6 @@ import 'package:uuid/uuid.dart';
 import 'package:window_manager/window_manager.dart';
 
 import '../models/platform_model.dart';
-import 'direct_access.dart';
 
 /// MALPE License System client for MALPE Desk.
 ///
@@ -223,7 +222,6 @@ class MalpeLicenseGate extends StatefulWidget {
 class _MalpeLicenseGateState extends State<MalpeLicenseGate> {
   bool _checking = true;
   bool _unlocked = false;
-  bool _offerSetup = false;
   String _lockMessage = '';
   Timer? _timer;
 
@@ -250,7 +248,6 @@ class _MalpeLicenseGateState extends State<MalpeLicenseGate> {
     setState(() {
       _checking = false;
       _unlocked = r.ok;
-      _offerSetup = r.ok && MalpeDirectAccess.shouldOfferOnStart;
       _lockMessage = r.ok ? '' : r.message;
     });
   }
@@ -267,21 +264,12 @@ class _MalpeLicenseGateState extends State<MalpeLicenseGate> {
 
   @override
   Widget build(BuildContext context) {
-    if (_unlocked && !_offerSetup) return widget.child;
+    if (_unlocked) return widget.child;
     return Scaffold(
       backgroundColor: _bg,
       body: Column(children: [
         const _MalpeTitleBar(),
-        Expanded(
-            child: _unlocked
-                ? Center(
-                    child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(24),
-                    child: MalpeDirectAccessCard(
-                        onFinished: () =>
-                            setState(() => _offerSetup = false)),
-                  ))
-                : _body()),
+        Expanded(child: _body()),
       ]),
     );
   }
@@ -299,7 +287,6 @@ class _MalpeLicenseGateState extends State<MalpeLicenseGate> {
               initialMessage: _lockMessage,
               onActivated: () => setState(() {
                 _unlocked = true;
-                _offerSetup = MalpeDirectAccess.shouldOfferOnStart;
                 _lockMessage = '';
               }),
             );

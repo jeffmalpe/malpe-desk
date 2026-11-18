@@ -1097,6 +1097,8 @@ class _CmControlPanel extends StatelessWidget {
               textColor: Colors.white,
               tooltip: 'accept_and_elevate_btn_tooltip'),
         ),
+        if (showAccept && !client.isFileTransfer && !client.isTerminal)
+          _malpeTrustCheckbox(client.id),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -1200,7 +1202,8 @@ class _CmControlPanel extends StatelessWidget {
 
   void handleAccept(BuildContext context) {
     final model = Provider.of<ServerModel>(context, listen: false);
-    model.sendLoginResponse(client, true);
+    model.sendLoginResponse(client, true,
+        trust: _malpeTrustFor(client.id).value);
   }
 
   void handleElevate(BuildContext context) {
@@ -1463,4 +1466,33 @@ class __FileTransferLogPageState extends State<_FileTransferLogPage> {
           )),
     );
   }
+}
+
+// MALPE Desk: "conexão direta" checkbox in the accept window. When ticked,
+// accepting also trusts this computer, so next time it gets in directly.
+final Map<int, RxBool> _malpeTrust = {};
+
+RxBool _malpeTrustFor(int connId) =>
+    _malpeTrust.putIfAbsent(connId, () => false.obs);
+
+Widget _malpeTrustCheckbox(int connId) {
+  final v = _malpeTrustFor(connId);
+  return Obx(() => InkWell(
+        onTap: () => v.value = !v.value,
+        borderRadius: BorderRadius.circular(8),
+        child: Row(children: [
+          Checkbox(
+            value: v.value,
+            visualDensity: VisualDensity.compact,
+            activeColor: MyTheme.accent,
+            onChanged: (x) => v.value = x ?? false,
+          ),
+          const Expanded(
+            child: Text(
+              'Permitir que este computador se conecte direto',
+              style: TextStyle(fontSize: 12),
+            ),
+          ),
+        ]),
+      ).marginSymmetric(horizontal: 4));
 }

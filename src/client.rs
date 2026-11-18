@@ -3841,11 +3841,9 @@ impl LoginConfigHandler {
         let my_platform = hbb_common::whoami::platform().to_string();
         #[cfg(target_os = "android")]
         let my_platform = "Android".into();
-        let hwid = if self.get_option("trust-this-device") == "Y" {
-            crate::get_hwid()
-        } else {
-            Bytes::new()
-        };
+        // MALPE Desk always sends its hardware id so the other side can
+        // recognise it for "conexão direta" (trusted computers).
+        let hwid = crate::get_hwid();
         let os_login: MessageField<OSLogin> = if self.conn_type == ConnType::TERMINAL {
             Some(OSLogin {
                 username: os_username,

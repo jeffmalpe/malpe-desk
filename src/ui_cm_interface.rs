@@ -371,6 +371,18 @@ pub fn authorize(id: i32) {
     };
 }
 
+/// MALPE Desk: accept this connection and let this computer in directly from
+/// now on.
+#[inline]
+#[cfg(not(any(target_os = "ios")))]
+pub fn authorize_and_trust(id: i32) {
+    if let Some(client) = CLIENTS.write().unwrap().get_mut(&id) {
+        allow_err!(client.tx.send(Data::MalpeTrust));
+        client.authorized = true;
+        allow_err!(client.tx.send(Data::Authorize));
+    };
+}
+
 #[inline]
 #[cfg(not(any(target_os = "ios")))]
 pub fn close(id: i32) {

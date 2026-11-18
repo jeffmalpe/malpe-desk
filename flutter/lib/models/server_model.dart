@@ -684,9 +684,13 @@ class ServerModel with ChangeNotifier {
     });
   }
 
-  void sendLoginResponse(Client client, bool res) async {
+  void sendLoginResponse(Client client, bool res, {bool trust = false}) async {
     if (res) {
-      bind.cmLoginRes(connId: client.id, res: res);
+      if (trust) {
+        bind.cmLoginResTrust(connId: client.id);
+      } else {
+        bind.cmLoginRes(connId: client.id, res: res);
+      }
       if (!client.isFileTransfer && !client.isTerminal) {
         parent.target?.invokeMethod("start_capture");
       }

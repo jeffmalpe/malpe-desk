@@ -763,6 +763,13 @@ impl Connection {
                                 break;
                             }
                         }
+                        ipc::Data::MalpeTrust => {
+                            crate::malpe_trust::add(
+                                &conn.lr.my_id,
+                                &conn.lr.my_name,
+                                &conn.lr.hwid,
+                            );
+                        }
                         ipc::Data::Close => {
                             conn.chat_unanswered = false; // seen
                             conn.file_transferred = false; //seen
@@ -3045,7 +3052,15 @@ impl Connection {
                 crate::get_builtin_option(keys::OPTION_ALLOW_LOGON_SCREEN_PASSWORD) == "Y"
                     && is_logon();
 
-            if (password::approve_mode() == ApproveMode::Click && !allow_logon_screen_password)
+            if crate::malpe_trust::is_trusted(&lr.my_id, &lr.hwid) {
+                // MALPE Desk: a computer the user chose to let in directly.
+                log::info!("malpe-trust: direct access for {}", lr.my_id);
+                self.set_conn_audit_primary_auth(ConnAuditPrimaryAuth::Click);
+                if !self.send_logon_response_and_keep_alive().await {
+                    return false;
+                }
+                self.try_start_cm(lr.my_id.clone(), lr.my_name.clone(), self.authorized);
+            } else if (password::approve_mode() == ApproveMode::Click && !allow_logon_screen_password)
                 || password::approve_mode() == ApproveMode::Both && !password::has_valid_password()
             {
                 #[cfg(not(any(target_os = "android", target_os = "ios")))]

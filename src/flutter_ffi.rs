@@ -2318,6 +2318,12 @@ pub fn cm_elevate_portable(conn_id: i32) {
     crate::ui_cm_interface::elevate_portable(conn_id);
 }
 
+/// MALPE Desk: accept and trust this computer for direct access.
+pub fn cm_login_res_trust(conn_id: i32) {
+    #[cfg(not(any(target_os = "ios")))]
+    crate::ui_cm_interface::authorize_and_trust(conn_id);
+}
+
 pub fn cm_switch_back(conn_id: i32) {
     #[cfg(not(any(target_os = "android", target_os = "ios")))]
     crate::ui_cm_interface::switch_back(conn_id);

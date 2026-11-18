@@ -373,6 +373,8 @@ pub enum Data {
     #[cfg(not(any(target_os = "android", target_os = "ios")))]
     MouseMoveTime(i64),
     Authorize,
+    /// MALPE Desk: trust the peer of this connection for direct access.
+    MalpeTrust,
     Close,
     #[cfg(windows)]
     SAS,
