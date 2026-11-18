@@ -9,7 +9,7 @@
 //! `{"id", "name", "hwid"}`. The Flutter UI lists and removes entries through
 //! the normal option IPC.
 
-use hbb_common::config::Config;
+use hbb_common::{config::Config, log};
 use serde_json::{json, Value};
 
 pub const OPTION_KEY: &str = "malpe-trusted-peers";
